@@ -2,7 +2,6 @@
    this repository contains the full copyright notices and license terms. */
 (function() {
     'use strict';
-
     Sao.ScreenContainer = Sao.class_(Object, {
         init: function(tab_domain) {
             this.alternate_viewport = jQuery('<div/>', {
@@ -689,6 +688,7 @@
             this.count_tab_domain();
         },
         load_next_view: function() {
+            console.log('load_next_view: ' + this.view_ids + ' - ' + this.view_to_load);
             if (!jQuery.isEmptyObject(this.view_to_load)) {
                 var view_id;
                 if (!jQuery.isEmptyObject(this.view_ids)) {
@@ -771,8 +771,12 @@
                 }
             }
             var _switch = function() {
-                if ((!view_type) || (!this.current_view) ||
-                        (this.current_view.view_type != view_type)) {
+                if (view_id) {
+                  console.log('switch: ' + view_id + ' - ' + (this.current_view && this.current_view.view_id));
+                }
+                if ((!this.current_view) ||
+                        (!view_type) || (this.current_view.view_type != view_type) ||
+                        (!view_id) || (this.current_view.view_id != view_id)) {
                     var switch_current_view = (function() {
                         this.current_view = this.views[this.views.length - 1];
                         return _switch();
@@ -785,12 +789,22 @@
                             return this.load_next_view().then(
                                     switch_current_view);
                         }
-                        this.current_view = this.views[
-                            (this.views.indexOf(this.current_view) + 1) %
-                            this.views.length];
-                        // JMO: report https://github.com/coopengo/tryton/pull/13
+                        this.current_view = null;
                         if (view_id) {
-                          if (this.current_view.view_id  == view_id) {
+                          for (var j = 0; j < this.views.length; j++) {
+                            if (this.views[j].view_id == view_id) {
+                              this.current_view = this.views[j];
+                              break;
+                            }
+                          }
+                        }
+                        if (!this.current_view) {
+                          this.current_view = this.views[
+                              (this.views.indexOf(this.current_view) + 1) %
+                              this.views.length];
+                        }
+                        if (view_id) {
+                          if (this.current_view.view_id == view_id) {
                             break;
                           }
                         }
