@@ -161,7 +161,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-po2json');
-    grunt.task.run(['concat', 'jshint', 'less', 'copy', 'po2json']);
+    grunt.task.run(['concat', 'less', 'copy', 'po2json']);
     });
   grunt.registerTask('dev', 'Build for development.', function() {
     grunt.loadNpmTasks('grunt-contrib-concat');

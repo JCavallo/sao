@@ -753,6 +753,7 @@
         },
         // [Coog specific] JMO: report https://github.com/coopengo/tryton/pull/13
         switch_view: function(view_type, view_id) {
+            console.log('switch: ' + view_type + ' - ' + view_id + ' [' + (this.current_view && this.current_view.view_id) + ' - ' + this.views.map((v) => v.view_id) + ']');
             if (this.current_view) {
                 this.current_view.set_value();
                 if (this.current_record &&
@@ -771,9 +772,6 @@
                 }
             }
             var _switch = function() {
-                if (view_id) {
-                  console.log('switch: ' + view_id + ' - ' + (this.current_view && this.current_view.view_id));
-                }
                 if ((!this.current_view) ||
                         (!view_type) || (this.current_view.view_type != view_type) ||
                         (!view_id) || (this.current_view.view_id != view_id)) {
@@ -781,39 +779,41 @@
                         this.current_view = this.views[this.views.length - 1];
                         return _switch();
                     }.bind(this));
-                    for (var i = 0; i < this.number_of_views(); i++) {
-                        if (this.view_to_load.length) {
-                            if (!view_type) {
-                                view_type = this.view_to_load[0];
-                            }
-                            return this.load_next_view().then(
-                                    switch_current_view);
-                        }
-                        this.current_view = null;
-                        if (view_id) {
-                          for (var j = 0; j < this.views.length; j++) {
-                            if (this.views[j].view_id == view_id) {
-                              this.current_view = this.views[j];
-                              break;
-                            }
-                          }
-                        }
-                        if (!this.current_view) {
-                          this.current_view = this.views[
-                              (this.views.indexOf(this.current_view) + 1) %
-                              this.views.length];
-                        }
-                        if (view_id) {
-                          if (this.current_view.view_id == view_id) {
-                            break;
-                          }
-                        }
-                        else if (!view_type) {
-                            break;
-                        } else if (this.current_view.view_type == view_type) {
-                            break;
-                        }
+                    var index = -1
+                    var canLoop = false
+                    if (this.current_view) {
+                        index = this.views.indexOf(this.current_view)
+                        canLoop = true
+                        this.current_view = null
                     }
+                    while (true) {
+                        index++
+                        console.log('loop', index, canLoop)
+                        if (index >= this.views.length) {
+                            if (this.view_to_load.length === 0) {
+                                if (canLoop) {
+                                  index = -1
+                                  canLoop = false
+                                  continue
+                                } else {
+                                  break
+                                }
+                            } else {
+                                view_type = this.view_to_load[0]
+                                return this.load_next_view().then(switch_current_view);
+                            }
+                        } else {
+                            var view = this.views[index]
+                            if ((!view_id || view.view_id == view_id) && (!view_type || view.view_type == view_type)) {
+                              this.current_view = view
+                              break
+                            }
+                        }
+
+                    }
+                }
+                if (!this.current_view) {
+                  this.current_view = this.views[0]
                 }
                 this.screen_container.set(this.current_view.el);
                 return this.display().done(function() {
@@ -988,6 +988,7 @@
             }
         },
         display: function(set_cursor) {
+            console.log('display: [' + (this.current_view && this.current_view.view_id)  + ' - ' + (this.current_record && this.current_record.id) + ' - ' + (this.group && this.group.length) + ']');
             var deferreds = [];
             if (this.current_record &&
                     ~this.current_record.group.indexOf(this.current_record)) {
