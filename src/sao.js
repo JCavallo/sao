@@ -143,10 +143,10 @@ var Sao = {};
         datetime.month(month);
         datetime.date(day);
         if (month !== undefined) {
-            datetime.hour(hour || 0);
-            datetime.minute(minute || 0);
-            datetime.second(second || 0);
-            datetime.milliseconds(millisecond || 0);
+            datetime.hour(hour);
+            datetime.minute(minute);
+            datetime.second(second);
+            datetime.milliseconds(millisecond);
         }
         datetime.isDateTime = true;
         datetime.local();
@@ -447,6 +447,7 @@ var Sao = {};
         init: function(favorite) {
             this.field = favorite;
             this.header = jQuery('<th/>');
+            this.footers = [];
             this.attributes = jQuery.extend({}, this.field.description);
             this.attributes.name = this.field.name;
 
@@ -528,7 +529,9 @@ var Sao = {};
                 var currently_focused = jQuery(document.activeElement);
                 var has_focus = currently_focused.closest(this.el) > 0;
                 if (!has_focus) {
-                    jQuery(this).find(':input:visible:first').focus();
+                    jQuery(this).find(':input:visible' +
+                        ':not([readonly]):not([tabindex^="-"]):first')
+                   .focus();
                 }
             });
         },
